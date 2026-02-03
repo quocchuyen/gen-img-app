@@ -2,6 +2,7 @@ import { Component, ChangeDetectionStrategy, signal, output, input } from '@angu
 import { CommonModule } from '@angular/common';
 import { AspectRatio, ImageModel } from '../../services/gemini.service';
 import { STYLE_PRESETS, IMAGE_MODELS, ASPECT_RATIOS, ImageModelOption, ImageGenerateRequest, Option, SIZE, IMG_OPTIONS } from '../../models/image-generation.model';
+import { LocalStorageService } from '../../services/local-storage.service';
 
 @Component({
   selector: 'app-gen-img-form',
@@ -22,11 +23,15 @@ export class GenImgFormComponent {
   stylePreset = signal<string>('');
   token = signal<string>('');
   model = signal<string>('nano-banana');
+  constructor(private storage: LocalStorageService) {
+    this.token.set(this.storage.get<string>('token') || '');
+  }
 
   onTokenChange(event: Event): void {
     const input = event.target as HTMLInputElement;
     let value = input.value;
     this.token.set(value);
+    this.storage.set<string>('token', value);
   }
 
   onNumberOfImagesChange(event: Event): void {
