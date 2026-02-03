@@ -6,7 +6,8 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "deploy": "ng build --base-href /gen-img-app/ && gh-pages -d dist/gen-img-app/browser"
   },
   "prettier": {
     "printWidth": 100,
@@ -42,6 +43,7 @@
     "@angular/compiler-cli": "^21.1.0",
     "@tailwindcss/postcss": "^4.1.12",
     "@types/file-saver": "^2.0.7",
+    "gh-pages": "^6.3.0",
     "jsdom": "^27.1.0",
     "postcss": "^8.5.3",
     "tailwindcss": "^4.1.12",
