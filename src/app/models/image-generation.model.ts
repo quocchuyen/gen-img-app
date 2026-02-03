@@ -43,3 +43,32 @@ export const IMAGE_MODELS: ImageModelOption[] = [
 ];
 
 export const ASPECT_RATIOS: AspectRatio[] = ["1:1", "16:9", "9:16", "4:3", "3:4"];
+
+export interface ImageGenerateRequest {
+  model: string;
+  prompt: string;
+  n?: number;
+  size: Size;
+  response_format?: 'b64_json';
+  seed?: number;
+}
+
+export interface ImageGenerateResponse {
+  created: number;
+  data: Array<{
+    b64_json: string;
+    revised_prompt?: string;
+  }>;
+}
+export type Option = {label: string, value: string};
+export type Size = '1792x1024' | '1024x1024' | '1024x1792';
+export const SIZE: Option[] = [
+  { label: "Landscape (16:9)", value: "1792x1024" },
+  { label: "Portrait (9:16)", value: "1024x1792" },
+  { label: "Square (1:1)", value: "1024x1024" }];
+
+export const IMG_OPTIONS: Option[] = [
+    { label: 'Nano Banana', value: 'nano-banana' },
+    { label: 'Nano Banana R2I', value: 'nano-banana-r2i'},
+    { label: 'Imagen 4.0', value: 'IMAGEN_4' },
+];

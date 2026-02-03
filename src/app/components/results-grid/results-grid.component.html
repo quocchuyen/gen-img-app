@@ -6,7 +6,7 @@
         <button
           (click)="downloadAllAsZip()"
           [disabled]="isZipping()"
-          class="flex items-center justify-center bg-teal-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-teal-500 disabled:bg-slate-600 disabled:cursor-not-allowed transition-colors duration-200">
+          class="cursor-pointer flex items-center justify-center bg-teal-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-teal-500 disabled:bg-slate-600 disabled:cursor-not-allowed transition-colors duration-200">
           @if(isZipping()) {
             <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -69,11 +69,11 @@
                  @for(image of result.images; track $index) {
                   <button 
                     (click)="downloadImage(image, result.prompt, $index)"
-                    class="w-full flex items-center justify-center bg-green-600/50 text-green-200 text-sm font-semibold py-2 px-3 rounded-md hover:bg-green-600/70 transition-colors duration-200">
+                    class="w-full flex items-center justify-center bg-green-600/50 text-green-200 text-sm font-semibold py-2 px-3 rounded-md hover:bg-green-600/70 transition-colors duration-200 cursor-pointer ">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
                       <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
                     </svg>
-                    <span>Download{{ result.images.length > 1 ? ' #' + ($index + 1) : '' }}</span>
+                    <span>{{ result.images.length > 1 ? ' #' + ($index + 1) : '' }}</span>
                   </button>
                 }
               </div>

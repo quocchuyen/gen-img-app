@@ -4,9 +4,11 @@ import { RouterOutlet } from '@angular/router';
 import { GenerationFormComponent } from './components/generation-form/generation-form.component';
 import { QueueProgressComponent } from './components/queue-progress/queue-progress.component';
 import { ResultsGridComponent } from './components/results-grid/results-grid.component';
-import { GenerationConfig, ImageGenerationResult } from './models/image-generation.model';
+import { GenerationConfig, ImageGenerateRequest, ImageGenerationResult, Size } from './models/image-generation.model';
 import { AspectRatio, GeminiService } from './services/gemini.service';
-
+import { GenImgFormComponent } from './components/gen-img-form/gen-img-form.component';
+import { ImageGenerateService } from './services/image-generate.service';
+import { firstValueFrom } from 'rxjs';
 @Component({
   selector: 'app-root',
   templateUrl: './app.html',
@@ -15,6 +17,7 @@ import { AspectRatio, GeminiService } from './services/gemini.service';
   imports: [
     CommonModule,
     GenerationFormComponent,
+    GenImgFormComponent,
     QueueProgressComponent,
     ResultsGridComponent,
     RouterOutlet
@@ -22,13 +25,13 @@ import { AspectRatio, GeminiService } from './services/gemini.service';
 })
 export class App {
   private readonly geminiService = inject(GeminiService);
-
+private readonly imgGenerateService = inject(ImageGenerateService);
   results = signal<ImageGenerationResult[]>([]);
   isLoading = signal<boolean>(false);
   
   // Aspect ratio is needed by the results grid to set the correct container size
   aspectRatio = signal<AspectRatio>('1:1');
-
+  size = signal<Size>('1792x1024');
   // Queue state signals
   totalQueueCount = signal<number>(0);
   completedQueueCount = signal<number>(0);
@@ -91,6 +94,65 @@ export class App {
       }
     }
     
+    this.isLoading.set(false);
+  }
+
+  async generateImg(config: ImageGenerateRequest & { stylePreset: string, token: string }){
+    if (this.isLoading()) {
+      return;
+    }
+
+    this.isLoading.set(true);
+    this.size.set(config.size); // Store for results grid
+    const promptsToProcess = config.prompt.trim().split('\n').filter(p => p.trim() !== '');
+
+    // Initialize queue state
+    this.totalQueueCount.set(promptsToProcess.length);
+    this.completedQueueCount.set(0);
+    this.currentPromptIndex.set(0);
+
+    // Initialize results with loading state
+    this.results.set(promptsToProcess.map(prompt => ({
+      prompt,
+      status: 'loading'
+    })));
+
+    // Process prompts sequentially
+    for (let i = 0; i < promptsToProcess.length; i++) {
+      this.currentPromptIndex.set(i + 1);
+      const prompt = promptsToProcess[i];
+      try {
+        const finalPrompt = config.stylePreset ? `${prompt}, ${config.stylePreset}` : prompt;
+        const options = {
+          ...config,
+          prompt: finalPrompt
+        };
+        const imageB64s = await firstValueFrom(
+          this.imgGenerateService.generateImage(options, config.token)
+        );
+
+        this.results.update(currentResults => {
+          const newResults = [...currentResults];
+          newResults[i] = { prompt: prompt, status: 'success', images: imageB64s };
+          return newResults;
+        });
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+        this.results.update(currentResults => {
+          const newResults = [...currentResults];
+          newResults[i] = { prompt: prompt, status: 'error', error: errorMessage };
+          return newResults;
+        });
+      } finally {
+        this.completedQueueCount.update(c => c + 1);
+      }
+
+      // Add a delay after each request to avoid hitting rate limits, except for the last prompt.
+      if (i < promptsToProcess.length - 1) {
+        await new Promise(resolve => setTimeout(resolve, 1000)); // 1-second delay
+      }
+    }
+
     this.isLoading.set(false);
   }
 }

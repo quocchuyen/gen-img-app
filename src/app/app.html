@@ -4,19 +4,24 @@
     
     <!-- Header -->
     <header class="text-center mb-8">
-      <h1 class="text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-600 mb-2">
+      <h1 class="text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-600 mb-4">
         Batch Image Generator
       </h1>
       <p class="text-slate-400 max-w-2xl mx-auto">
-        Enter multiple prompts, one per line, to generate a collection of images at once using the Gemini API.
+        Enter multiple prompts, one per line, to generate a collection of images at once using the Nano Banana API.
       </p>
     </header>
 
     <!-- Generation Form Component -->
-    <app-generation-form 
+    <!-- <app-generation-form 
       [isLoading]="isLoading()" 
       (generate)="generateImages($event)">
-    </app-generation-form>
+    </app-generation-form> -->
+    
+    <app-gen-img-form 
+      [isLoading]="isLoading()" 
+      (generate)="generateImg($event)">
+    </app-gen-img-form>
 
     <!-- Queue Progress Indicator Component -->
     @if (isLoading()) {

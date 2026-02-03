@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, input, computed, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { ImageGenerationResult } from '../../models/image-generation.model';
 import { AspectRatio } from '../../services/gemini.service';
 import JSZip from 'jszip';
@@ -10,6 +10,7 @@ import saveAs from 'file-saver';
   selector: 'app-results-grid',
   templateUrl: './results-grid.component.html',
   imports: [CommonModule],
+  providers: [DatePipe],
 })
 export class ResultsGridComponent {
   results = input.required<ImageGenerationResult[]>();
@@ -18,7 +19,16 @@ export class ResultsGridComponent {
   isZipping = signal<boolean>(false);
 
   hasSuccessfulImages = computed(() => this.results().some(r => r.status === 'success' && r.images && r.images.length > 0));
+  constructor(private datePipe: DatePipe) {
 
+  }
+
+  formatDate(date: Date = new Date()): string {
+    return this.datePipe.transform(
+      date,
+      'dd-MM-yyyy-HH-mm'
+    )!;
+  }
   downloadImage(imageB64: string, prompt: string, index: number): void {
     if (!imageB64) return;
 
@@ -67,7 +77,7 @@ export class ResultsGridComponent {
       }
 
       const content = await zip.generateAsync({ type: 'blob' });
-      saveAs(content, 'generated_images.zip');
+      saveAs(content, `generated_images_${this.formatDate()}.zip`);
 
     } catch (error) {
       console.error("Failed to create zip file:", error);
